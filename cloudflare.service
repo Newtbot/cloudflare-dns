@@ -1,0 +1,15 @@
+[Unit]
+Description= cloudflare script that checks if my public ip has change and updates my subdomain.
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=60
+User=root
+WorkingDirectory=/home/noot/updateDNS
+ExecStart=/usr/bin/node /home/noot/updateDNS
+
+[Install]
+WantedBy=multi-user.target

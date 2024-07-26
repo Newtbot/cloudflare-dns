@@ -1,0 +1,10 @@
+[Unit]
+Description=cloudflare.service script timer to run every hour
+
+[Timer]
+OnCalendar=*-*-* *:00:00
+Persistent=true
+Unit=cloudflare.service
+
+[Install]
+WantedBy=multi-user.target
