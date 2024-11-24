@@ -37,11 +37,11 @@ class CloudFlare {
 	async getIP() {
 		try {
 			const res = await axios.get("https://wtfismyip.com/json");
-			// console.log(res.data.YourFuckingIPAddress);
+			console.log(res.data.YourFuckingIPAddress);
             return res.data.YourFuckingIPAddress;
 		} catch (error) {
-			console.log(error)
-		}
+			console.log(error.response);
+				}
 	}
 	async getDNS() {
 		//to get individual domain details you would need dns_record_id which can only be obtained from list all domain??
@@ -59,8 +59,7 @@ class CloudFlare {
 			// console.log(cfRes.data.result.content); //PUBLIC IP
             return cfRes.data.result.content; // will return ip currently being used by the subdomain
 		} catch (error) {
-			console.log(error)
-
+			console.log(error.response);
 		}
 	}
 	//write the logic to comapre both public ip if one is different or blah update accordingly
@@ -103,8 +102,7 @@ class CloudFlare {
 			};
 			let cfRes = await axios.request(options);
 		} catch (error) {
-			console.log(error)
-
+			console.log(error.response);
 		}
 	}
 }
@@ -119,8 +117,8 @@ if (require.main === module) {
 				process.env.ZONE_ID,
 				process.env.BASE_URL
 			);
-			cloudflare.compareIP()
-			// cloudflare.getIP()
+			// cloudflare.compareIP()
+			cloudflare.getIP()
 		} catch (error) {
 			console.log("IIFE Error:", error);
 		}
