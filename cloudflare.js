@@ -117,8 +117,8 @@ if (require.main === module) {
 				process.env.ZONE_ID,
 				process.env.BASE_URL
 			);
-			// cloudflare.compareIP()
-			cloudflare.getIP()
+			cloudflare.compareIP()
+			// cloudflare.getIP()
 		} catch (error) {
 			console.log("IIFE Error:", error);
 		}
