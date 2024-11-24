@@ -40,9 +40,7 @@ class CloudFlare {
 			// console.log(res.data.YourFuckingIPAddress);
             return res.data.YourFuckingIPAddress;
 		} catch (error) {
-			console.log(error.response.status);
-			console.log(error.response.statusText);
-			console.log(error.response);
+			console.log(error)
 		}
 	}
 	async getDNS() {
@@ -61,9 +59,8 @@ class CloudFlare {
 			// console.log(cfRes.data.result.content); //PUBLIC IP
             return cfRes.data.result.content; // will return ip currently being used by the subdomain
 		} catch (error) {
-			console.log(error.response.status);
-			console.log(error.response.statusText);
-			console.log(error.response); // this is the main part. Use the response property from the error object
+			console.log(error)
+
 		}
 	}
 	//write the logic to comapre both public ip if one is different or blah update accordingly
@@ -76,9 +73,8 @@ class CloudFlare {
 			}
 
 		} catch (error) {
-			console.log(error.response.status);
-			console.log(error.response.statusText);
-			console.log(error.response); // this is the main part. Use the response property from the error object
+			console.log(error)
+
 		}
 	}
 
@@ -107,9 +103,8 @@ class CloudFlare {
 			};
 			let cfRes = await axios.request(options);
 		} catch (error) {
-			console.log(error.response.status);
-			console.log(error.response.statusText);
-			console.log(error.response); // this is the main part. Use the response property from the error object
+			console.log(error)
+
 		}
 	}
 }
@@ -125,6 +120,7 @@ if (require.main === module) {
 				process.env.BASE_URL
 			);
 			cloudflare.compareIP()
+			// cloudflare.getIP()
 		} catch (error) {
 			console.log("IIFE Error:", error);
 		}
