@@ -4,27 +4,25 @@ const axios = require("axios");
 require("dotenv").config();
 
 // # Flow of my program
-// # first get IP records of the current WG domain name from CF
+// # first get IP records of the using my base.js domain records
 // # if the IP and my current Public IP is different i should use CF API and update it
 
 class CloudFlare {
-	// constructor(apiToken, zoneId, baseUrl) {
-	// 	this.apiToken = apiToken;
-	// 	this.zoneId = zoneId;
-	// 	this.baseUrl = baseUrl;
-	// }
 	constructor(config) {
 		this.config = config
-		this.apiToken = process.env.API_TOKEN
 	}
 	//write the logic to comapre both public ip if one is different or blah update accordingly
-	async compareIP() {
+	async compareIP(domainName) {
 		try {
-			if (this.getIP() !== this.getDNS()) {
+			// console.log(await this.getIP())
+			// console.log(await this.getDNS(domainName))
+			if (await this.getIP() !== await this.getDNS(domainName)) {
+				// console.log(domainName)
 				//call updateDNS
-				const newIP = await this.getIP();
-				this.updateDNS(newIP);
+				const newIp = await this.getIP();
+				this.updateDNS(newIp , domainName);
 			}
+
 		} catch (error) {
 			console.log(error);
 		}
@@ -55,7 +53,7 @@ class CloudFlare {
 	async getIP() {
 		try {
 			const res = await axios.get("https://wtfismyip.com/json");
-			console.log(res.data.YourFuckingIPAddress);
+			// console.log(res.data.YourFuckingIPAddress);
 			return res.data.YourFuckingIPAddress;
 		} catch (error) {
 			console.log(error.response);
@@ -66,14 +64,14 @@ class CloudFlare {
 			const subDomain = domainName.split('.')[0];
 			const options = {
 				method: "GET",
-				url: `${config.domains baseUrl}/${this.zoneId}/dns_records/${config.domains+ "." + subDomain.cloudflare_Dns_Id}`,
+				url: `${config.domains[subDomain].baseUrl}/${config.domains[subDomain].zoneId}/dns_records/${config.domains[subDomain].cloudflareDnsId}`,
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: "Bearer " + this.apiToken
+					Authorization: "Bearer " + config.domains.apiToken,
 				},
 			};
 			let cfRes = await axios.request(options);
-			console.log(cfRes)
+			// console.log(cfRes.data.result.content)
 			return cfRes.data.result.content; // will return ip currently being used by the subdomain
 		} catch (error) {
 			console.log(error.response);
@@ -81,26 +79,27 @@ class CloudFlare {
 	}
 
 	//the logic will be called in compareIP
-	async updateDNS(ip) {
+	async updateDNS(iP , domainName) {
 		try {
 			//required!
 			// content
 			// name
 			// type
-			// comment
+			const subDomain = domainName.split('.')[0];
+			const utcTime = new Date().toISOString();
 
 			const options = {
 				method: "PATCH",
-				url: `${this.baseUrl}${this.zoneId}/dns_records/${process.env.DNS_RECORD_ID}`,
+				url: `${config.domains[subDomain].baseUrl}/${config.domains[subDomain].zoneId}/dns_records/${config.domains[subDomain].cloudflareDnsId}`,
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: "Bearer " + this.apiToken,
+					Authorization: "Bearer " + config.domains.apiToken,
 				},
 				data: {
-					content: ip,
-					name: "wireguard.teeseng.uk",
+					content: iP,
+					name: domainName,
 					type: "A",
-					comment: "For WG VPN purposes",
+					comment: `auto updated at ${utcTime} for ${domainName} `,
 				},
 			};
 			let cfRes = await axios.request(options);
@@ -116,52 +115,22 @@ if (require.main === module) {
 	(async function () {
 		//write a for loop that runs through my subdomains?
 		try {
-			const domainValues = Object.values(config.domains).map(
-				(obj) => obj.domain
-			);
-			// console.log(config)
+			//chatgpt code ....
+			const domainValues = Object.values(config.domains)
+			.filter(obj => typeof obj === 'object' && obj.domain) 
+			.map(obj => obj.domain);
 
-			// const domainValues = Object.values(config.domains)
-			// console.log(domainValues[0])
-
-			//for loop
+			//for each domain name in my base.js file. 
 			for (let domainName of domainValues) {
-				// console.log(domainName)
 				//write a logic to compare ip for domain in the loop
-				//need to pass 
 				let cloudflare = new CloudFlare(config);
-				cloudflare.getDNS(domainName)
-
+				cloudflare.compareIP(domainName)
 
 			}
 
-			let cloudflare = new CloudFlare();
-			// process.env.API_TOKEN,
-			// process.env.ZONE_ID,
-			// process.env.BASE_URL
-			// cloudflare.getAllDNS()
-			// cloudflare.compareIP()
-			// cloudflare.getIP()
 		} catch (error) {
 			console.log("IIFE Error:", error);
 		}
 	})();
 }
 
-// if (require.main === module) {
-//     (async function () {
-//         try {
-//           for(let domain of secrets.domain){
-//               let cloudflare = new CloudFlare(
-//                   domain.API_TOKEN,
-//                   domain.ZONE_ID,
-//                   domoain.BASE_URL
-//               );
-//               cloudflare.compareIP()
-//             // cloudflare.getIP()
-//           }
-//         } catch (error) {
-//             console.log("IIFE Error:", error);
-//         }
-//     })();
-// }
